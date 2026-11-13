@@ -12,7 +12,7 @@ from backend.routers import users, articles, reviews
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
-    title="Submission Review System API",
+    title="投稿審查 API",
     description="API for authors and editors",
     version="1.0.0"
 )
