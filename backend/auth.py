@@ -12,6 +12,8 @@ from sqlalchemy.orm import Session
 from backend.database import get_db
 from backend.models import User
 
+
+# Load environment variables
 load_dotenv()
 
 SECRET_KEY = os.getenv("SECRET_KEY")
@@ -19,25 +21,32 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 if not SECRET_KEY:
     raise ValueError("SECRET_KEY is missing in .env")
 
+
+# JWT settings
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
+
+# Password hashing
 password_hash = PasswordHash.recommended()
 
+
+def hash_password(password: str):
+    return password_hash.hash(password)
+
+
+def verify_password(plain_password: str, hashed_password: str):
+    return password_hash.verify(plain_password, hashed_password)
+
+
+# OAuth2 authentication
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl="/api/users/login"
 )
 
 
-def hash_password(password):
-    return password_hash.hash(password)
-
-
-def verify_password(plain_password, hashed_password):
-    return password_hash.verify(plain_password, hashed_password)
-
-
-def create_access_token(data):
+# Create JWT token
+def create_access_token(data: dict):
     to_encode = data.copy()
 
     expire = datetime.now(timezone.utc) + timedelta(
@@ -46,9 +55,14 @@ def create_access_token(data):
 
     to_encode.update({"exp": expire})
 
-    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return jwt.encode(
+        to_encode,
+        SECRET_KEY,
+        algorithm=ALGORITHM
+    )
 
 
+# Get currently logged-in user
 def get_current_user(
     token: str = Depends(oauth2_scheme),
     db: Session = Depends(get_db)
@@ -84,7 +98,8 @@ def get_current_user(
     return user
 
 
-def require_role(role):
+# Check user role
+def require_role(role: str):
     def role_checker(
         current_user: User = Depends(get_current_user)
     ):

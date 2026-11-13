@@ -8,7 +8,7 @@ from backend.models import Category
 
 from backend.routers import users, articles, reviews
 
-# Create database tables
+
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
@@ -17,7 +17,7 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Allow frontend to communicate with API
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
